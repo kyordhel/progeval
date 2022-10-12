@@ -3,9 +3,13 @@
 # But these files
 !.gitignore
 !.gitattributes
-!Pipfile
 !LICENSE
+!Pipfile
+!requirements.txt
 !readme.MD
+!setup.py
 # And these directories
+!docs/
 !evaluator/
+!tests/
 # And these file types
