@@ -1,0 +1,11 @@
+# Ignore everything
+*
+# But these files
+!.gitignore
+!.gitattributes
+!Pipfile
+!LICENSE
+!readme.MD
+# And these directories
+!evaluator/
+# And these file types

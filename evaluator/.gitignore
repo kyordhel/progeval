@@ -1,0 +1,7 @@
+# Ignore everything
+*
+# But these files
+!.gitignore
+!template.tex
+# And these file types
+!*.py
