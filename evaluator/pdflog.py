@@ -117,7 +117,14 @@ def _pdfbuild(texfile):
 #end def
 
 def _pdfclean(texfile):
-	args = ['-c', texfile]
+	tfpath = os.path.abspath(texfile)
+	aopath = os.path.dirname(tfpath)
+	args = [
+		'-c',
+		f'-auxdir={aopath}',
+		f'-outdir={aopath}',
+		texfile
+	]
 	return execute('latexmk', args, addpath=False)
 #end def
 
