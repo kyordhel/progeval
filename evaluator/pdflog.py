@@ -103,8 +103,12 @@ def encrypt_pdf(pdffile):
 def _pdfbuild(texfile):
 	# args = ['-halt-on-error', '-output-directory', 'tex', texfile]
 	# return execute('pdflatex', args, timeout=20)
+	tfpath = os.path.abspath(texfile)
+	aopath = os.path.dirname(tfpath)
 	args = [
-		'-cd', '-gg', '-pdf', '-silent',
+		'-gg', '-pdf', '-silent',
+		f'-auxdir={aopath}',
+		f'-outdir={aopath}',
 		'-halt-on-error',
 		# '-outdir=tex',
 		texfile
@@ -204,7 +208,7 @@ class PdfLog():
 		text+= self.__footer
 
 		fprefix = hashlib.sha1(text.encode('utf-8')).hexdigest()
-		fprefix = 'foo'
+		# fprefix = 'foo'
 		texfile = os.path.join('tex', f'{fprefix}.tex')
 		logfile = os.path.join('tex', f'{fprefix}.log')
 		auxfile = os.path.join('tex', f'{fprefix}.aux')
