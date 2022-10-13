@@ -67,7 +67,7 @@ def build():
 
 def encrypt_pdf(pdffile):
 	sha1 = hashlib.sha1()
-	if not isinscance(pdffile, str) or not os.path.exists(pdffile):
+	if not isinstance(pdffile, str) or not os.path.exists(pdffile):
 		pyprint(f'Failed to encrypt {pdffile}. File does not exist.', file=sys.stderr)
 		return
 
