@@ -10,10 +10,11 @@
 # ## ###############################################################
 
 import os
+import sys
 import argparse
-from . import specs
-from . import evaluator
-from . import pdflog
+from .specs import     from_xml as specs_from_xml
+from .evaluator import from_specs as evaluator_from_specs
+from .pdflog import encrypt_pdf, build as pdf_build
 
 
 def fetch_args():
@@ -43,15 +44,20 @@ def fetch_args():
 def main():
 	args = fetch_args()
 	# print(args)
-	s = specs.from_xml(args.specs_file)
+	s = specs_from_xml(args.specs_file)
 	# print(s.__dict__)
-	e = evaluator.from_specs(s)
+	e = evaluator_from_specs(s)
 	e.evaluate(args.source)
-	report = pdflog.build()
+	report = pdf_build()
 	# print(f'args: {args}')
+	if not report:
+		print('Failed to generate report file.', file=sys.stderr)
+		print('Aborted.', file=sys.stderr)
+		sys.exit(-1)
+
 	print('Evaluation complete')
 	print('Encrypting...')
-	pdflog.encrypt_pdf(report)
+	encrypt_pdf(report)
 
 	if args.output and len(args.output) > 0:
 		print(f'Moving {report} to {args.output[0]}')

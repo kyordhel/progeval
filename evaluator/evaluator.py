@@ -51,6 +51,7 @@ class Evaluator():
 
 		build = {
 			'C'  : common.cbuild,
+			'C+' : common.cppbuild,
 			'Py' : common.pybuild,
 		}.get(self._specs.language[0:2], None)
 		if not build:
@@ -111,8 +112,9 @@ class Evaluator():
 
 			i+=1
 			pdflog.write(f'Test {i} of {len(tb)}: ')
-			pdflog.rawwrite('\\texttt{{{} {}}}'.format(exefile, ' '.join([str(v) for v in t.args])))
-			pdflog.writeline()
+			pdflog.rawwrite('\\Verb^./')
+			pdflog.rawwrite('{} {}'.format(exefile, ' '.join([str(v) for v in t.args])))
+			pdflog.writeline('^')
 			o, e, p = common.execute(self._exefile, t.args, timeout=t.timeout)
 			if p is None:
 				return passcount

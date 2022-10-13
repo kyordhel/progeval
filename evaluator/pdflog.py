@@ -113,6 +113,7 @@ def _pdfbuild(texfile):
 		# '-outdir=tex',
 		texfile
 	]
+	pyprint('\nExec: latexmk ' + '\n  '.join(args) + '\n')
 	return execute('latexmk', args, timeout=20, addpath=False)
 #end def
 
@@ -140,7 +141,9 @@ class PdfLog():
 		self.__header = ''
 		self.__footer = ''
 		rxContent = re.compile(r'%Content%[\r\n]*')
-		with open('evaluator/template.tex') as f:
+		here = os.path.abspath(os.path.dirname(__file__))
+		template = os.path.join(here, 'template.tex')
+		with open(template) as f:
 			line = f.readline()
 			flag = False
 			while line:
@@ -227,10 +230,12 @@ class PdfLog():
 			f.write(text)
 
 		if not _pdfbuild(os.path.abspath(texfile)):
-			pyprint(f'Failed to build {pdffile}.', file=sys.stderr)
+			pyprint(f'Failed to build {pdffile}: no input file {texfile}', file=sys.stderr)
+
 		_pdfclean(os.path.abspath(texfile))
 
 		if not os.path.exists(pdffile):
+			pyprint(f'Failed to build {pdffile}', file=sys.stderr)
 			return None
 		return pdffile
 	# end def

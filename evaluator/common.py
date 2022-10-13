@@ -43,8 +43,28 @@ def cbuild(buildtool, srcfile, flags=[], outfile=None):
 	if isinstance(flags, str):
 		flags = re.split(r'\s+', flags)
 	args = [buildtool]
+	args.extend([srcfile, '-x', 'c', '-o', outfile])
 	args.extend(flags)
-	args.extend([srcfile, '-o', outfile])
+	print(args)
+	if pyver() > 3.6:
+		cp = sp.run(args, capture_output=True)
+	else:
+		cp = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
+	if cp.returncode != 0:
+		delete(outfile)
+		return None
+	return outfile
+# end def
+
+def cppbuild(buildtool, srcfile, flags=[], outfile=None):
+	if not outfile:
+		outfile = srcfile[:-2]
+	if isinstance(flags, str):
+		flags = re.split(r'\s+', flags)
+	args = [buildtool]
+	args.extend([srcfile, '-x', 'c++', '-o', outfile])
+	args.extend(flags)
+	print(args)
 	if pyver() > 3.6:
 		cp = sp.run(args, capture_output=True)
 	else:

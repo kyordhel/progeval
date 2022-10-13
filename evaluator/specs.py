@@ -34,6 +34,8 @@ def from_xml(file):
 
 	if lang == 'c':
 		return CSpecs(conf[0])
+	elif lang == 'c++':
+		return CPPSpecs(conf[0])
 	elif lang == 'python':
 		return PySpecs(conf[0])
 	else:
@@ -167,6 +169,18 @@ class CSpecs(Specs):
 		Specs.__init__(self, domconf)
 		self._lang = 'C'
 		self._buildTool = 'gcc'
+		self._parseBuild(domconf)
+		self._parseTestbeds(domconf)
+	# end def
+# end class
+
+
+
+class CPPSpecs(Specs):
+	def __init__(self, domconf):
+		Specs.__init__(self, domconf)
+		self._lang = 'C++'
+		self._buildTool = 'g++'
 		self._parseBuild(domconf)
 		self._parseTestbeds(domconf)
 	# end def
