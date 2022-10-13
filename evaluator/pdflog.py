@@ -210,10 +210,8 @@ class PdfLog():
 		with open(texfile, 'w') as f:
 			f.write(text)
 
-
-		_pdfbuild(texfile)
-		_pdfclean(texfile)
-
+		_pdfbuild(os.path.abspath(texfile))
+		_pdfclean(os.path.abspath(texfile))
 
 		return pdffile
 	# end def
