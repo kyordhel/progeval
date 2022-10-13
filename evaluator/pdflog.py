@@ -11,6 +11,7 @@
 
 import re
 import os
+import sys
 import hashlib
 import subprocess as sp
 from .common import execute, delete
@@ -66,6 +67,10 @@ def build():
 
 def encrypt_pdf(pdffile):
 	sha1 = hashlib.sha1()
+	if not os.path.exists(pdffile):
+		pyprint(f'Failed to encrypt {pdffile}. File does not exist.', file=sys.stderr)
+		return
+
 	with open(pdffile, 'rb') as f:
 		while True:
 			data = f.read(65535)
@@ -89,7 +94,7 @@ def encrypt_pdf(pdffile):
 		delete(pdffile)
 		os.rename(efname, pdffile)
 	else:
-		pyprint(f'{efname} does not exist')
+		pyprint(f'{efname} does not exist', file=sys.stderr)
 	pyprint('Done')
 #end def
 
@@ -210,11 +215,15 @@ class PdfLog():
 		with open(texfile, 'w') as f:
 			f.write(text)
 
-		_pdfbuild(os.path.abspath(texfile))
+		if not _pdfbuild(os.path.abspath(texfile)):
+			pyprint(f'Failed to build {pdffile}.', file=sys.stderr)
 		_pdfclean(os.path.abspath(texfile))
 
+		if not os.path.exists(pdffile):
+			return None
 		return pdffile
 	# end def
+
 
 	@staticmethod
 	def __texcolor(color):
@@ -253,6 +262,7 @@ class PdfLog():
 			return color
 		return 'black'
 	# end def
+
 
 	@staticmethod
 	def __format(s):
