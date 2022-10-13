@@ -16,18 +16,26 @@ import subprocess as sp
 def error(s):
 	eprint(s)
 	sys.exit(1)
+# end def
 
 def warn(s):
 	eprint(s)
+# end def
 
 def eprint(*args, **kwargs):
 	print(*args, file=sys.stderr, **kwargs)
+# end def
 
 def delete(file):
 	if not isinstance(file, str):
 		return
 	if os.path.exists(file):
 		os.remove(file)
+# end def
+
+def pyver():
+	return int(sys.version_info[0]) + 0.1 * int(sys.version_info[1])
+# end def
 
 def cbuild(buildtool, srcfile, flags=[], outfile=None):
 	if not outfile:
@@ -37,7 +45,10 @@ def cbuild(buildtool, srcfile, flags=[], outfile=None):
 	args = [buildtool]
 	args.extend(flags)
 	args.extend([srcfile, '-o', outfile])
-	cp = sp.run(args, capture_output=True)
+	if pyver() > 3.6:
+		cp = sp.run(args, capture_output=True)
+	else:
+		cp = sp.run(args, stdout=sp.PIPE, stderr=sp.PIPE)
 	if cp.returncode != 0:
 		delete(outfile)
 		return None

@@ -53,7 +53,7 @@ def main():
 	print('Encrypting...')
 	pdflog.encrypt_pdf(report)
 
-	if len(args.output) > 0:
+	if args.output and len(args.output) > 0:
 		print(f'Moving {report} to {args.output[0]}')
 		os.rename(report, args.output[0])
 		report = args.output[0]
