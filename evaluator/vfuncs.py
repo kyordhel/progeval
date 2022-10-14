@@ -163,11 +163,14 @@ def parse(s):
 	             'minlength', 'maxlength',
 	             'lt', 'leq', 'gt', 'geq',
 	             'contains', 'anyof', 'matches']
-	if not fname or not fname in supported:
-		return VFunc('equals', __unescape(s))
 
-	fargs = __split_fargs(fargs)
-	# print(f'\tfargs (split): {fargs}')
+	if not fname or not fname in supported:
+		fname = 'equals'
+		fargs = [fargs]
+	else:
+		fargs = __split_fargs(fargs)
+		# print(f'\tfargs (split): {fargs}')
+
 	okfargs = True
 	if fname in ['equals', 'different']:
 		okfargs = __check_fargs(fargs, argstype=None, num=1)
@@ -222,7 +225,7 @@ def __split_fargs(s):
 		cc+=1
 	#end while
 	if cc > bcc:
-		fargs.append( __unescape(s[bcc:min(cc, len(s))].strip()) )
+		fargs.append( s[bcc:min(cc, len(s))].strip() )
 	return fargs
 # end def
 
@@ -272,6 +275,8 @@ def __check_fargs(fargs, argstype=str, num=1):
 				fargs[i] = argstype(fargs[i])
 			else:
 				fargs[i] = __autoconvert(fargs[i])
+			if isinstance(fargs[i], str):
+				fargs[i] = __unescape(fargs[i])
 		except:
 			return False
 	return True
