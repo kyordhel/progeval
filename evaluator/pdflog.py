@@ -100,6 +100,16 @@ def encrypt_pdf(pdffile):
 
 
 
+def getVerbChar(s):
+	verchars = '^|`"<>!@#$%&+-/.,:;()~'
+	for c in verchars:
+		if c in s:
+			continue
+		return c
+#end def
+
+
+
 def _pdfbuild(texfile):
 	# args = ['-halt-on-error', '-output-directory', 'tex', texfile]
 	# return execute('pdflatex', args, timeout=20)
@@ -113,7 +123,7 @@ def _pdfbuild(texfile):
 		# '-outdir=tex',
 		texfile
 	]
-	pyprint('\nExec: latexmk ' + '\n  '.join(args) + '\n')
+	# pyprint('\nExec: latexmk ' + '\n  '.join(args) + '\n')
 	return execute('latexmk', args, timeout=20, addpath=False)
 #end def
 
@@ -143,7 +153,7 @@ class PdfLog():
 		rxContent = re.compile(r'%Content%[\r\n]*')
 		here = os.path.abspath(os.path.dirname(__file__))
 		template = os.path.join(here, 'template.tex')
-		with open(template) as f:
+		with open(template, 'r', encoding='utf-8') as f:
 			line = f.readline()
 			flag = False
 			while line:
@@ -218,7 +228,7 @@ class PdfLog():
 		text+= self.__footer
 
 		fprefix = hashlib.sha1(text.encode('utf-8')).hexdigest()
-		# fprefix = 'foo'
+		fprefix = 'foo'
 		texfile = os.path.join('tex', f'{fprefix}.tex')
 		logfile = os.path.join('tex', f'{fprefix}.log')
 		auxfile = os.path.join('tex', f'{fprefix}.aux')
@@ -226,7 +236,7 @@ class PdfLog():
 
 		if not os.path.exists('tex'):
 			os.mkdir('tex')
-		with open(texfile, 'w') as f:
+		with open(texfile, 'w', encoding='utf-8') as f:
 			f.write(text)
 
 		if not _pdfbuild(os.path.abspath(texfile)):

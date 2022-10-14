@@ -53,6 +53,7 @@ class VFunc():
 		# elif isinstance(self._fargs[0], int):
 		# 	value = VFunc._toint(value)
 		# 	if not value: return False
+		# print(f'equals: "{value}" == "{self._fargs[0]}"')
 		return value == self._fargs[0]
 	# end def
 
@@ -153,15 +154,20 @@ class VFunc():
 
 
 def parse(s):
+	# print(f'parsing: {s}')
 	fname, fargs = __split(s.strip())
+	# print(f'\tfname: {fname}')
+	# print(f'\tfargs: {fargs}')
+
 	supported = ['equals', 'different', 'between',
 	             'minlength', 'maxlength',
 	             'lt', 'leq', 'gt', 'geq',
 	             'contains', 'anyof', 'matches']
 	if not fname or not fname in supported:
-		return parse(f'equals({fargs})')
+		return VFunc('equals', __unescape(s))
 
 	fargs = __split_fargs(fargs)
+	# print(f'\tfargs (split): {fargs}')
 	okfargs = True
 	if fname in ['equals', 'different']:
 		okfargs = __check_fargs(fargs, argstype=None, num=1)
@@ -204,7 +210,7 @@ def __split_fargs(s):
 		if s[cc].isspace():
 			bcc = cc = __skips_paces(s, cc+1)
 			continue
-		elif s[cc] == '\\':
+		if s[cc] == '\\':
 			cc+=1
 		elif s[cc] == ',':
 			if cc > bcc:
@@ -216,7 +222,7 @@ def __split_fargs(s):
 		cc+=1
 	#end while
 	if cc > bcc:
-		fargs.append(s[bcc:min(cc, len(s))])
+		fargs.append( __unescape(s[bcc:min(cc, len(s))].strip()) )
 	return fargs
 # end def
 
@@ -240,6 +246,19 @@ def __read_quotedstr(s, cc):
 			cc+=1
 		cc+=1
 	return s[bcc:cc], cc
+# end def
+
+
+
+def __unescape(s):
+	replacements = {
+		'\\r' : '\r',
+		'\\n' : '\n',
+		'\\t' : '\t',
+	}
+	for r in replacements:
+		s = s.replace(r, replacements[r])
+	return s
 # end def
 
 

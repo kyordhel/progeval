@@ -25,6 +25,11 @@ class Evaluator():
 		self._reset()
 	#end def
 
+	@property
+	def compiled(self):
+		return self._specs and self._specs.compiled
+	# end def
+
 	def evaluate(self, source):
 		if not self._specs:
 			return
@@ -67,7 +72,12 @@ class Evaluator():
 			return False
 
 		self._score+= self._specs.buildScore
-		exefile = os.path.basename(self._exefile)
+
+		if not isinstance(self._exefile, str):
+			exefile = os.path.basename(self._srcfile)
+			self._exefile = self._specs.interpreter
+		else:
+			exefile = os.path.basename(self._exefile)
 		pdflog.info('Built {}'.format(exefile))
 		if self._specs.buildScore > 0:
 			pdflog.writeline('Score {:+0.1f}'.format(self._specs.buildScore))
@@ -94,14 +104,13 @@ class Evaluator():
 					pdflog.writeline('Evaluation halted.') # , color='Maroon'
 				if tb.onError in ['abort', 'halt']:
 					break
-
 	#end def
 
 
 	def _run_testbed(self, tb):
 		i = 0
-		srcfile = os.path.basename(self._srcfile)
-		exefile = os.path.basename(self._exefile)
+		# srcfile = os.path.basename(self._srcfile)
+		# exefile = os.path.basename(self._exefile)
 		passcount = 0
 		for t in tb:
 			if (passcount < i) and (tb.onError in ['abort', 'skip']):
@@ -112,29 +121,58 @@ class Evaluator():
 
 			i+=1
 			pdflog.write(f'Test {i} of {len(tb)}: ')
-			pdflog.rawwrite('\\Verb^./')
-			pdflog.rawwrite('{} {}'.format(exefile, ' '.join([str(v) for v in t.args])))
-			pdflog.writeline('^')
-			o, e, p = common.execute(self._exefile, t.args, timeout=t.timeout)
+			self._writeCmdStr(t)
+
+			o, e, p = self._execute(t)
+
 			if p is None:
 				return passcount
 
 			if t.cout and not t.checkCout(o):
-				pdflog.writeline(f'\tOutput {o.strip()}: REJECTED!', color='YellowOrange')
+				self._writeReject('Output', o.strip())
 				continue
 
 			if t.cerr and not t.checkCerr(e):
-				pdflog.writeline(f'\tOutput (stderr) {e.strip()}: REJECTED!', color='YellowOrange')
+				self._writeReject('Output (stderr)', e.strip())
 				continue
 
 			if t.retval and not t.checkRetval(p.returncode):
-				pdflog.writeline(f'\tReturn code {p.returncode}: REJECTED!', color='YellowOrange')
+				self._writeReject('Return code', p.returncode)
 				continue
 
 			passcount+= 1
 			pdflog.writeline('\tPass', color='OliveGreen')
 
 		return passcount
+	#end def
+
+	def _execstr(self, testset):
+		exefile = os.path.basename(self._exefile)
+		if self.compiled:
+			s = './{} '.format(exefile)
+		else:
+			s = '{} {} '.format(exefile, os.path.basename(self._srcfile))
+		s+= ' '.join([
+			str(a) if not ' ' in str(a) else f'"{str(a)}"'
+			for a in testset.args
+		])
+		return s.strip()
+		# 80
+		# 'python3 ground.py "A mamá, Roma le aviva el amor a papá, y a papá, Roma le aviva el"' amor a mamá."
+	#end def
+
+	def _execute(self, testset):
+		if self.compiled:
+			o, e, p = common.execute(self._exefile, testset.args,
+				timeout=testset.timeout, addpath=True)
+		else:
+			o, e, p = common.execute(self._exefile, [ self._srcfile ] + testset.args,
+				timeout=testset.timeout, addpath=False)
+		if isinstance(o, str):
+			o = o.strip()
+		if isinstance(e, str):
+			e = e.strip()
+		return o, e, p
 	#end def
 
 	def _reset(self):
@@ -145,6 +183,30 @@ class Evaluator():
 
 	def _clean(self):
 		common.delete(self._exefile)
+	#end def
+
+	def _writeCmdStr(self, testset, width=72):
+		estr = self._execstr(testset)
+		parts = [ estr[i:i+width] for i in range(0, len(estr), width) ]
+		for i in range(len(parts)):
+			vc = pdflog.getVerbChar(parts[i])
+			if i > 0:
+				pdflog.rawwrite('\\hspace{10em}')
+			pdflog.rawwrite(f'\\Verb{ vc }{ parts[i] }{ vc }')
+			pdflog.writeline()
+	#end def
+
+	def _writeReject(self, stream, verbatim):
+		verbatim = verbatim.strip()
+		pdflog.write(f'\t{stream}')
+		if '\n' in verbatim:
+			pdflog.rawwrite('\n\\begin{Verbatim}\n')
+			pdflog.rawwrite(verbatim)
+			pdflog.rawwrite('\n\\end{Verbatim}\n')
+		else:
+			vc = pdflog.getVerbChar(verbatim)
+			pdflog.rawwrite(f' \\Verb{ vc }{ verbatim }{ vc }: ')
+		pdflog.writeline('REJECTED!', color='YellowOrange')
 	#end def
 
 	def _writeSummary(self):

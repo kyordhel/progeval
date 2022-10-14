@@ -12,19 +12,26 @@ import os
 import re
 import sys
 import subprocess as sp
+import py_compile as pyc
 
 def error(s):
 	eprint(s)
 	sys.exit(1)
 # end def
 
+
+
 def warn(s):
 	eprint(s)
 # end def
 
+
+
 def eprint(*args, **kwargs):
 	print(*args, file=sys.stderr, **kwargs)
 # end def
+
+
 
 def delete(file):
 	if not isinstance(file, str):
@@ -33,19 +40,23 @@ def delete(file):
 		os.remove(file)
 # end def
 
+
+
 def pyver():
 	return int(sys.version_info[0]) + 0.1 * int(sys.version_info[1])
 # end def
 
+
+
 def cbuild(buildtool, srcfile, flags=[], outfile=None):
 	if not outfile:
-		outfile = srcfile[:-2]
+		dot = srcfile.rfind('.')
+		outfile = srcfile[:dot]
 	if isinstance(flags, str):
 		flags = re.split(r'\s+', flags)
 	args = [buildtool]
 	args.extend([srcfile, '-x', 'c', '-o', outfile])
 	args.extend(flags)
-	print(args)
 	if pyver() > 3.6:
 		cp = sp.run(args, capture_output=True)
 	else:
@@ -56,15 +67,17 @@ def cbuild(buildtool, srcfile, flags=[], outfile=None):
 	return outfile
 # end def
 
+
+
 def cppbuild(buildtool, srcfile, flags=[], outfile=None):
 	if not outfile:
-		outfile = srcfile[:-2]
+		dot = srcfile.rfind('.')
+		outfile = srcfile[:dot]
 	if isinstance(flags, str):
 		flags = re.split(r'\s+', flags)
 	args = [buildtool]
 	args.extend([srcfile, '-x', 'c++', '-o', outfile])
 	args.extend(flags)
-	print(args)
 	if pyver() > 3.6:
 		cp = sp.run(args, capture_output=True)
 	else:
@@ -75,9 +88,26 @@ def cppbuild(buildtool, srcfile, flags=[], outfile=None):
 	return outfile
 # end def
 
+
+
 def pybuild(buildtool, srcfile, flags=[], outfile=None):
-	return None
+	if not outfile:
+		dot = srcfile.rfind('.')
+		outfile = srcfile[:dot]
+
+	print(f'PyCompile: {srcfile} -> {outfile}')
+	try:
+		of = pyc.compile(srcfile, doraise=True, quiet=1)
+		os.rename(of, outfile)
+	except Exception as e:
+		import traceback
+		traceback.print_exc()
+		return False
+	finally:
+		delete(outfile)
+	return True
 # end def
+
 
 
 def execute(exefile, args=[], timeout=15, addpath=True):

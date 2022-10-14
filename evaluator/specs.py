@@ -13,6 +13,7 @@
 import re
 import os
 import shlex
+from abc import abstractmethod
 from xml.dom import minidom
 from .common import error, warn
 from .vfuncs import parse as vfparse
@@ -62,6 +63,20 @@ class Specs():
 
 
 	@property
+	@abstractmethod
+	def compiled(self):
+		pass
+	# end def
+
+
+	@property
+	@abstractmethod
+	def interpreter(self):
+		pass
+	# end def
+
+
+	@property
 	def buildTool(self):
 		return self._buildTool
 	# end def
@@ -96,6 +111,14 @@ class Specs():
 		if not flags or len(flags) < 1:
 			return
 		self._buildFlags = flags[0].firstChild.data
+	# end def
+
+
+	def _parseInterpreter(self, conf):
+		inters = conf.getElementsByTagName('interpreter')
+		if not inters or len(inters) < 1:
+			return
+		self._interpreter = inters[0].firstChild.nodeValue
 	# end def
 
 
@@ -172,6 +195,16 @@ class CSpecs(Specs):
 		self._parseBuild(domconf)
 		self._parseTestbeds(domconf)
 	# end def
+
+	@property
+	def compiled(self):
+		return True
+	# end def
+
+	@property
+	def interpreter(self):
+		return None
+	# end def
 # end class
 
 
@@ -184,6 +217,16 @@ class CPPSpecs(Specs):
 		self._parseBuild(domconf)
 		self._parseTestbeds(domconf)
 	# end def
+
+	@property
+	def compiled(self):
+		return True
+	# end def
+
+	@property
+	def interpreter(self):
+		return None
+	# end def
 # end class
 
 
@@ -192,6 +235,30 @@ class PySpecs(Specs):
 	def __init__(self, domconf):
 		Specs.__init__(self, domconf)
 		self._lang = 'Python'
+		self._interpreter = 'python3'
+		self._parseBuild(domconf)
+		self._parseInterpreter(domconf)
+		self._parseTestbeds(domconf)
+		self._buildTool = self._interpreter
+	# end def
+
+	def _parseInterpreter(self, domconf):
+		super()._parseInterpreter(domconf)
+		if not isinstance(self._interpreter, str):
+			self._interpreter = 'python3'
+		self._interpreter = self._interpreter.lower()
+		if not self._interpreter.startswith('python'):
+			self._interpreter = 'python3'
+	# end def
+
+	@property
+	def compiled(self):
+		return False
+	# end def
+
+	@property
+	def interpreter(self):
+		return self._interpreter
 	# end def
 # end class
 
