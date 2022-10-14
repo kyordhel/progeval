@@ -199,13 +199,17 @@ class Evaluator():
 	def _writeReject(self, stream, verbatim):
 		verbatim = verbatim.strip()
 		pdflog.write(f'\t{stream}')
-		if '\n' in verbatim:
-			pdflog.rawwrite('\n\\begin{Verbatim}\n')
-			pdflog.rawwrite(verbatim)
-			pdflog.rawwrite('\n\\end{Verbatim}\n')
+		if isinstance(verbatim, str) and len(verbatim) > 0:
+			if '\n' in verbatim:
+				pdflog.rawwrite('\n\\begin{Verbatim}\n')
+				pdflog.rawwrite(verbatim)
+				pdflog.rawwrite('\n\\end{Verbatim}\n')
+			else:
+				vc = pdflog.getVerbChar(verbatim)
+				pdflog.rawwrite(f' \\Verb{ vc }{ verbatim }{ vc }: ')
 		else:
-			vc = pdflog.getVerbChar(verbatim)
-			pdflog.rawwrite(f' \\Verb{ vc }{ verbatim }{ vc }: ')
+			pdflog.rawwrite(': (none). ')
+
 		pdflog.writeline('REJECTED!', color='YellowOrange')
 	#end def
 
