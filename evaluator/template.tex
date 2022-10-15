@@ -1,16 +1,23 @@
 \documentclass{article}
+
+\usepackage{ifxetex}
+\ifxetex%
+	\usepackage{fontspec}
+	% \setmainfont[Ligatures=TeX]{TeX Gyre Termes}
+\else
+	\usepackage[utf8]{inputenc}
+	\usepackage[T1]{fontenc}
+\fi
+
 % \usepackage{parskip}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 \usepackage{enumitem}
 \usepackage{fancyhdr}
 \usepackage{geometry}
 \usepackage{fancyvrb}
 \usepackage{lastpage}
+% \usepackage{newunicodechar}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{hyperref}
-
-\DeclareUnicodeCharacter{2014}{---}
 
 \hypersetup{
 	hidelinks,%
@@ -24,10 +31,10 @@
 \MakeRobust{\ref}% avoid expanding it when in a textual label
 \makeatletter
 \newcommand{\labeltext}[2]{%
-  \@bsphack{}%
-  \csname phantomsection\endcsname% CHKTEX 41
-  \def\@currentlabel{#1}{\label{#2}}#1%  CHKTEX 21
-  \@esphack{}%
+	\@bsphack{}%
+	\csname phantomsection\endcsname% CHKTEX 41
+	\def\@currentlabel{#1}{\label{#2}}#1%  CHKTEX 21
+	\@esphack{}%
 }
 \makeatother
 

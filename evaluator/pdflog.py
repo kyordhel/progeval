@@ -18,6 +18,7 @@ from .common import execute, delete
 
 pyprint = print
 
+
 def section(s):
 	__pdflog.section(s)
 #end def
@@ -51,6 +52,10 @@ def write(s, color=None):
 
 def writeline(s='', color=None):
 	__pdflog.writeline(s, color=color)
+#end def
+
+def writeverbatim(verbatim):
+	__pdflog.writeverbatim(verbatim)
 #end def
 
 def print(s, end="\n\n", color=None):
@@ -101,11 +106,40 @@ def encrypt_pdf(pdffile):
 
 
 def getVerbChar(s):
-	verchars = '^|`"<>!@#$%&+-/.,:;()~'
+	if __latexmk_ver >= 4.31:
+		verchars = '§¬¥^|`"<>!@#$%&+-/.,:;()~'
+	else:
+		verchars = '^|`"<>!@#$%&+-/.,:;()~'
 	for c in verchars:
 		if c in s:
 			continue
 		return c
+#end def
+
+
+
+def _get_pdftk_version():
+	o, e, p = execute('pdftk', ['--version'], timeout=1, addpath=False)
+	if p is None or p.returncode != 0:
+		raise(OSError('pdftk is not installed'))
+		# pdftk port to java 3.0.9
+	m = re.search(r'pdftk([a-z ]+)\s+(\d+\.\d+)(\.\d+)?', o, re.I)
+	if m:
+		pyprint(f'pdftk version {m.group(2)}')
+		return float(m.group(2))
+	return None
+#end def
+
+
+
+def _get_latexmk_version():
+	o, e, p = execute('latexmk', ['--version'], timeout=1, addpath=False)
+	if p is None or p.returncode != 0:
+		raise(OSError('latexmk is not installed'))
+	m = re.search(r'Version\s+(\d+\.\d+)', o, re.I)
+	if m:
+		return float(m.group(1))
+	return None
 #end def
 
 
@@ -120,12 +154,15 @@ def _pdfbuild(texfile):
 		f'-auxdir={aopath}',
 		f'-outdir={aopath}',
 		'-halt-on-error',
-		# '-outdir=tex',
-		texfile
 	]
+	if __latexmk_ver >= 4.31:
+		args.append('-xelatex')
+	args.append(texfile)
 	# pyprint('\nExec: latexmk ' + '\n  '.join(args) + '\n')
 	return execute('latexmk', args, timeout=20, addpath=False)
 #end def
+
+
 
 def _pdfclean(texfile):
 	tfpath = os.path.abspath(texfile)
@@ -136,6 +173,8 @@ def _pdfclean(texfile):
 		f'-outdir={aopath}',
 		texfile
 	]
+	if __latexmk_ver >= 4.31:
+		args.append('-xelatex')
 	return execute('latexmk', args, addpath=False)
 #end def
 
@@ -206,6 +245,26 @@ class PdfLog():
 	def writeline(self, s='', color=None):
 		self.print(s, color=color)
 	# end def
+
+	def writeverbatim(self, verbatim):
+		if not isinstance(verbatim, str) or len(verbatim) < 1:
+			return
+		if '\n' in verbatim:
+			self.writeVerbatimBlock(verbatim)
+		else:
+			self.writeVerbatimInline(verbatim)
+	#end def
+
+	def writeVerbatimBlock(self, verbatim):
+		self.rawwrite('\n\\begin{Verbatim}\n')
+		self.rawwrite(verbatim)
+		self.rawwrite('\n\\end{Verbatim}\n')
+	#end def
+
+	def writeVerbatimInline(self, verbatim):
+		vc = getVerbChar(verbatim)
+		self.rawwrite(f'\\Verb{ vc }{ verbatim }{ vc }')
+	#end def
 
 	def print(self, s, end='\n\n', color=None):
 		if not isinstance(s, str):
@@ -306,3 +365,5 @@ class PdfLog():
 # end class
 
 __pdflog = PdfLog()
+__pdftk_ver = _get_pdftk_version()
+__latexmk_ver = _get_latexmk_version()
