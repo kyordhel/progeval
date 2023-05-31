@@ -118,7 +118,7 @@ class VFunc():
 
 
 	def _matches(self, value):
-		return re.fullmatch(self._fargs[0], value) is not None
+		return re.search(self._fargs[0], value) is not None
 	# end def
 
 
