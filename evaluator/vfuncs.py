@@ -49,7 +49,7 @@ class VFunc():
 	def _equals(self, value):
 		if isinstance(self._fargs[0], (int, float)):
 			value = VFunc._tofloat(value)
-			if not value: return False
+			if value is None: return False
 		# elif isinstance(self._fargs[0], int):
 		# 	value = VFunc._toint(value)
 		# 	if not value: return False
@@ -60,7 +60,7 @@ class VFunc():
 	def _different(self, value):
 		if isinstance(self._fargs[0], (int, float)):
 			value = VFunc._tofloat(value)
-			if not value: return False
+			if value is None: return False
 		return value == self._fargs[0]
 	# end def
 
@@ -74,35 +74,35 @@ class VFunc():
 
 	def _between(self, value):
 		value = VFunc._tofloat(value)
-		if not value: return False
+		if value is None: return False
 		return value >= self._fargs[0] and value <= self._fargs[1]
 	# end def
 
 
 	def _lt(self, value):
 		value = VFunc._tofloat(value)
-		if not value: return False
+		if value is None: return False
 		return value < self._fargs[0]
 	# end def
 
 
 	def _leq(self, value):
 		value = VFunc._tofloat(value)
-		if not value: return False
+		if value is None: return False
 		return value <= self._fargs[0]
 	# end def
 
 
 	def _gt(self, value):
 		value = VFunc._tofloat(value)
-		if not value: return False
+		if value is None: return False
 		return value > self._fargs[0]
 	# end def
 
 
 	def _geq(self, value):
 		value = VFunc._tofloat(value)
-		if not value: return False
+		if value is None: return False
 		return value >= self._fargs[0]
 	# end def
 

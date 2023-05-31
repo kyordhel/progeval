@@ -57,6 +57,7 @@ class Evaluator():
 		if self._specs.language[0:2] == 'Py' and \
 			not self._specs.buildScore and \
 			not self._specs.buildFlags:
+			self._exefile = self._specs.interpreter
 			return True
 
 		build = {
