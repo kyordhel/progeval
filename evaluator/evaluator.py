@@ -54,6 +54,11 @@ class Evaluator():
 		if not self._specs.buildTool:
 			return
 
+		if self._specs.language[0:2] == 'Py' and \
+			not self._specs.buildScore and \
+			not self._specs.buildFlags:
+			return True
+
 		build = {
 			'C'  : common.cbuild,
 			'C+' : common.cppbuild,
