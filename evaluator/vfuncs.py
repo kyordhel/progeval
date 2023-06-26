@@ -32,6 +32,7 @@ class VFunc():
 		self._func = {
 			'equals'      : self._equals,
 			'different'   : self._different,
+			'around'      : self._around,
 			'between'     : self._between,
 			'minlength'   : self._minlength,
 			'maxlength'   : self._maxlength,
@@ -41,6 +42,9 @@ class VFunc():
 			'geq'         : self._geq,
 			'contains'    : self._contains,
 			'anyof'       : self._anyof,
+			'in'          : self._anyof,
+			'noneof'      : self._noneof,
+			'notin'       : self._noneof,
 			'matches'     : self._matches
 		}.get(self._fname, None)
 	# end def
@@ -70,6 +74,12 @@ class VFunc():
 
 	def _maxlength(self, value):
 		return len(value) <= self._fargs[0]
+	# end def
+
+	def _around(self, value):
+		value = VFunc._tofloat(value)
+		if value is None: return False
+		return abs(value - self._fargs[0]) < self._fargs[0] * self._fargs[1]
 	# end def
 
 	def _between(self, value):
@@ -117,6 +127,11 @@ class VFunc():
 	# end def
 
 
+	def _noneof(self, value):
+		return value not in self._fargs
+	# end def
+
+
 	def _matches(self, value):
 		return re.search(self._fargs[0], value) is not None
 	# end def
@@ -159,10 +174,12 @@ def parse(s):
 	# print(f'\tfname: {fname}')
 	# print(f'\tfargs: {fargs}')
 
-	supported = ['equals', 'different', 'between',
+	supported = ['equals', 'different',
+	             'between', 'around',
 	             'minlength', 'maxlength',
 	             'lt', 'leq', 'gt', 'geq',
-	             'contains', 'anyof', 'matches']
+	             'contains', 'anyof', 'in',
+	             'notin', 'noneof', 'matches']
 
 	if not fname or not fname in supported:
 		fname = 'equals'
@@ -171,16 +188,16 @@ def parse(s):
 		fargs = __split_fargs(fargs)
 		# print(f'\tfargs (split): {fargs}')
 
-	okfargs = True
+	okfargs = False
 	if fname in ['equals', 'different']:
 		okfargs = __check_fargs(fargs, argstype=None, num=1)
-	elif fname == 'between':
+	elif fname in ['between', 'around']:
 		okfargs = __check_fargs(fargs, argstype=float, num=2)
 	elif fname in ['minlength', 'maxlength']:
 		okfargs = __check_fargs(fargs, argstype=int, num=1)
 	elif fname in ['lt', 'leq', 'gt', 'geq']:
 		okfargs = __check_fargs(fargs, argstype=float, num=1)
-	elif fname in ['anyof']:
+	elif fname in ['anyof', 'noneof', 'in', 'notin']:
 		okfargs = __check_fargs(fargs, argstype=str, num=-1)
 	elif fname in ['contains', 'matches']:
 		okfargs = __check_fargs(fargs, argstype=str, num=1)
@@ -206,22 +223,28 @@ def __split(s):
 
 
 def __split_fargs(s):
+	print(f'fargs: "{s}"')
 	cc = 0
 	bcc = 0
 	fargs = []
 	while cc < len(s):
-		if s[cc].isspace():
-			bcc = cc = __skips_paces(s, cc+1)
-			continue
 		if s[cc] == '\\':
 			cc+=1
-		elif s[cc] == ',':
-			if cc > bcc:
-				fargs.append(s[bcc:cc])
 		elif s[cc] == '"' or s[cc] == '\'':
 			qstr, cc = __read_quotedstr(s, cc)
 			fargs.append(qstr)
 			bcc = cc+1
+		elif s[cc] == ',' or s[cc].isspace():
+			if cc > bcc:
+				fargs.append(s[bcc:cc])
+				bcc = cc+1
+			bcc = cc = __skips_paces(s, cc+1)
+			continue
+		# elif s[cc].isspace():
+			# print(f'\tbcc: {bcc} | cc: {cc} | s[cc]: {s[cc] if cc < len(s) else None} | s[bcc:cc]: {s[bcc:cc]} | args: {fargs}')
+			# bcc = cc = __skips_paces(s, cc+1)
+			# continue
+		print(f'\tbcc: {bcc} | cc: {cc} | s[cc]: {s[cc]} | s[bcc:cc]: {s[bcc:cc]} | args: {fargs}')
 		cc+=1
 	#end while
 	if cc > bcc:
@@ -291,3 +314,12 @@ def __autoconvert(s):
 		return int(s)
 	return s
 # end def
+
+
+
+if __name__ == '__main__':
+	print('Vfunc:', parse('between(3, 5)')  )
+	print('Vfunc:', parse('between(3,5)')   )
+	print('Vfunc:', parse('between( 3, 5 )')   )
+	print('Vfunc:', parse('between( 3,5 )')   )
+	print('Vfunc:', parse('notin( "uno", "dos", "tres" )')   )
