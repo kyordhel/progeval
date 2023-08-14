@@ -17,7 +17,8 @@ from abc import abstractmethod
 from xml.dom import minidom
 from .common import error, warn
 from .vfuncs import parse as vfparse
-
+from xml.dom.minicompat import NodeList
+from xml.dom.minidom import Element, Text
 
 def from_xml(file):
 	if not os.path.isfile(file):
@@ -49,7 +50,7 @@ def from_xml(file):
 class Specs():
 	def __init__(self, domconf):
 		self._buildTool = None
-		self._buildFlags = None
+		self._buildFlags = []
 		self._buildScore = 0
 		self._lang = None
 		self._testbeds = []
@@ -108,11 +109,13 @@ class Specs():
 			self._buildScore = float(build[0].attributes['score'].value)
 
 		flags = build[0].getElementsByTagName('flags')
-		if not flags or (flags is None) or (len(flags) < 1):
+		if not isinstance(flags, NodeList) or (len(flags) < 1):
 			return
-		flags = flags[0].firstChild
-		if not flags or (flags is None):
-			self._buildFlags = flags[0].firstChild.data
+		if not isinstance(flags[0], Element):
+			return
+		if not isinstance(flags[0].firstChild, Text):
+			return
+		self._buildFlags = flags[0].firstChild.data
 	# end def
 
 
