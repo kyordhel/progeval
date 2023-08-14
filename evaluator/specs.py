@@ -102,14 +102,16 @@ class Specs():
 
 	def _parseBuild(self, conf):
 		build = conf.getElementsByTagName('build')
-		if not build or len(build) < 1:
+		if not build or (build is None) or (len(build) < 1):
 			return
 		if 'score' in build[0].attributes:
 			self._buildScore = float(build[0].attributes['score'].value)
 
 		flags = build[0].getElementsByTagName('flags')
-		if not flags or len(flags) < 1:
+		if not flags or (flags is None) or (len(flags) < 1):
 			return
+		flags = flags[0].firstChild
+		if not flags or (flags is None):
 		self._buildFlags = flags[0].firstChild.data
 	# end def
 
