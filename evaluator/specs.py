@@ -112,7 +112,7 @@ class Specs():
 			return
 		flags = flags[0].firstChild
 		if not flags or (flags is None):
-		self._buildFlags = flags[0].firstChild.data
+			self._buildFlags = flags[0].firstChild.data
 	# end def
 
 
