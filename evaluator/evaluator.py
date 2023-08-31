@@ -215,7 +215,7 @@ class Evaluator():
 	#end def
 
 	def _writeSummary(self):
-		with open(self._srcfile, 'r') as f:
+		with open(self._srcfile, 'r', encoding='utf-8') as f:
 			src = f.read()
 		now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		sha1 = hashlib.sha1(src.encode('utf-8')).hexdigest()
