@@ -119,7 +119,7 @@ def execute(exefile, args=[], timeout=15, addpath=True):
 		out = out.decode("utf-8")
 		err = err.decode("utf-8")
 	except sp.TimeoutExpired:
-		log.warning("Timeout! Process didn't finish within {:.2f} seconds".format(float(timeout)))
+		# log.warning("Timeout! Process didn't finish within {:.2f} seconds".format(float(timeout)))
 		proc.kill()
 		out, err = proc.communicate(timeout=timeout)
 		return None, None, None
