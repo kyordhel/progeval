@@ -132,7 +132,9 @@ class Evaluator():
 			o, e, p = self._execute(t)
 
 			if p is None:
-				return passcount
+				self._writeReject('Execution timed out', f'{t.timeout:0.2f}s')
+				pdflog.writeline('Testbed aborted')
+				break
 
 			if t.cout and not t.checkCout(o):
 				self._writeReject('Output', o.strip())

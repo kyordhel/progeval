@@ -16,6 +16,7 @@ import hashlib
 import subprocess as sp
 from .common import execute, delete
 
+DEFAULT_TIMEOUT = 20
 pyprint = print
 
 
@@ -159,7 +160,7 @@ def _pdfbuild(texfile):
 		args.append('-xelatex')
 	args.append(texfile)
 	# pyprint('\nExec: latexmk ' + '\n  '.join(args) + '\n')
-	return execute('latexmk', args, timeout=20, addpath=False)
+	return execute('latexmk', args, timeout=DEFAULT_TIMEOUT, addpath=False)
 #end def
 
 
