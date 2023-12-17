@@ -132,8 +132,8 @@ class Evaluator():
 			o, e, p = self._execute(t)
 
 			if p is None:
-				self._writeReject('Execution timed out', f'{t.timeout:0.2f}s')
-				pdflog.writeline('Testbed aborted')
+				self._writeTimeout(t.timeout)
+				pdflog.writeline('\tTestbed aborted')
 				break
 
 			if t.cout and not t.checkCout(o):
@@ -202,6 +202,20 @@ class Evaluator():
 				pdflog.rawwrite('\\hspace{10em}')
 			pdflog.rawwrite(f'\\Verb{ vc }{ parts[i] }{ vc }')
 			pdflog.writeline()
+	#end def
+
+	def _writeTimeout(self, timeout):
+		unit = 'second'
+		if timeout >= 60:
+			timeout/= 60
+			unit = 'minute'
+		elif timeout < 1:
+			timeout*= 1000
+			unit = 'millisecond'
+		if (timeout//1) != 1:
+			unit+= 's'
+		pdflog.writeline(f'\tExecution timed out after {timeout:0.0f} {unit}.')
+		pdflog.writeline('\tTIMEOUT!', color='YellowOrange')
 	#end def
 
 	def _writeReject(self, stream, verbatim):
