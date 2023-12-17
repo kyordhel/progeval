@@ -433,7 +433,7 @@ class TestRun():
 			tr.retval = int(tre.attributes['retval'].value)
 
 		if 'timeout' in tre.attributes:
-			tr.retval = float(tre.attributes['timeout'].value)
+			tr.timeout = float(tre.attributes['timeout'].value)
 
 		return tr
 	# end def
