@@ -223,7 +223,6 @@ def __split(s):
 
 
 def __split_fargs(s):
-	print(f'fargs: "{s}"')
 	cc = 0
 	bcc = 0
 	fargs = []
@@ -244,7 +243,6 @@ def __split_fargs(s):
 			# print(f'\tbcc: {bcc} | cc: {cc} | s[cc]: {s[cc] if cc < len(s) else None} | s[bcc:cc]: {s[bcc:cc]} | args: {fargs}')
 			# bcc = cc = __skips_paces(s, cc+1)
 			# continue
-		print(f'\tbcc: {bcc} | cc: {cc} | s[cc]: {s[cc]} | s[bcc:cc]: {s[bcc:cc]} | args: {fargs}')
 		cc+=1
 	#end while
 	if cc > bcc:

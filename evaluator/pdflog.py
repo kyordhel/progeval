@@ -126,7 +126,7 @@ def _get_pdftk_version():
 		# pdftk port to java 3.0.9
 	m = re.search(r'pdftk([a-z ]+)\s+(\d+\.\d+)(\.\d+)?', o, re.I)
 	if m:
-		pyprint(f'pdftk version {m.group(2)}')
+		# pyprint(f'pdftk version {m.group(2)}')
 		return float(m.group(2))
 	return None
 #end def
